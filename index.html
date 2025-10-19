@@ -3,266 +3,129 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Live TV Streamer</title>
+    <title>My Live TV</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         :root {
-            --primary-bg: #f4f7fa;
-            --secondary-bg: #ffffff;
-            --header-bg: #ffffff;
-            --sidebar-bg: #2c3e50;
-            --text-primary: #2c3e50;
-            --text-secondary: #7f8c8d;
-            --text-sidebar: #ecf0f1;
-            --accent-color: #3498db;
-            --hover-color: #ecf0f1;
-            --border-color: #e0e0e0;
-            --shadow-color: rgba(0, 0, 0, 0.1);
-            --icon-color: #8e959b;
-            --icon-hover-color: #3498db;
+            --primary-bg: #f4f7fa; --secondary-bg: #ffffff; --header-bg: #ffffff; --sidebar-bg: #2c3e50;
+            --text-primary: #2c3e50; --text-secondary: #7f8c8d; --text-sidebar: #ecf0f1; --accent-color: #3498db;
+            --hover-color: #ecf0f1; --border-color: #e0e0e0; --shadow-color: rgba(0, 0, 0, 0.1);
+            --icon-color: #8e959b; --icon-hover-color: #3498db;
         }
-
         .dark-theme {
-            --primary-bg: #1a1a1a;
-            --secondary-bg: #2b2b2b;
-            --header-bg: #2b2b2b;
-            --sidebar-bg: #212121;
-            --text-primary: #ffffff;
-            --text-secondary: #bdc3c7;
-            --text-sidebar: #ecf0f1;
-            --accent-color: #3498db;
-            --hover-color: #3d3d3d;
-            --border-color: #424242;
-            --shadow-color: rgba(0, 0, 0, 0.4);
-            --icon-color: #bdc3c7;
-            --icon-hover-color: #3498db;
+            --primary-bg: #1a1a1a; --secondary-bg: #2b2b2b; --header-bg: #2b2b2b; --sidebar-bg: #212121;
+            --text-primary: #ffffff; --text-secondary: #bdc3c7; --text-sidebar: #ecf0f1; --accent-color: #3498db;
+            --hover-color: #3d3d3d; --border-color: #424242; --shadow-color: rgba(0, 0, 0, 0.4);
+            --icon-color: #bdc3c7; --icon-hover-color: #3498db;
         }
-
         * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--primary-bg);
-            color: var(--text-primary);
-            transition: background-color 0.3s, color 0.3s;
-            padding-top: 60px;
-            padding-left: 240px;
-        }
-        
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: var(--primary-bg); color: var(--text-primary); transition: background-color 0.3s, color 0.3s; padding-top: 60px; padding-left: 240px; }
         body.sidebar-collapsed { padding-left: 0; }
-
-        .header {
-            position: fixed; top: 0; left: 240px; right: 0; height: 60px;
-            background-color: var(--header-bg); display: flex; align-items: center;
-            padding: 0 20px; box-shadow: 0 2px 4px var(--shadow-color); z-index: 1001;
-            transition: all 0.3s ease;
-        }
-        
+        .header { position: fixed; top: 0; left: 240px; right: 0; height: 60px; background-color: var(--header-bg); display: flex; align-items: center; padding: 0 20px; box-shadow: 0 2px 4px var(--shadow-color); z-index: 1001; transition: all 0.3s ease; }
         body.sidebar-collapsed .header { left: 0; }
-
         .header .menu-btn { display: none; cursor: pointer; background: none; border: none; padding: 5px; }
         .header .menu-icon { width: 24px; height: 24px; stroke: var(--icon-color); }
-
-        .header-title {
-            font-size: 1.2rem; font-weight: 600; margin: 0 20px;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-
+        .header-title { font-size: 1.2rem; font-weight: 600; margin: 0 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .search-bar { flex-grow: 1; margin: 0 20px; }
-        .search-bar input {
-            width: 100%; max-width: 400px; padding: 8px 12px; border-radius: 20px;
-            border: 1px solid var(--border-color); background-color: var(--primary-bg); color: var(--text-primary);
-        }
-
+        .search-bar input { width: 100%; max-width: 400px; padding: 8px 12px; border-radius: 20px; border: 1px solid var(--border-color); background-color: var(--primary-bg); color: var(--text-primary); }
         .header-actions { display: flex; align-items: center; gap: 15px; }
         .header-actions button { background: none; border: none; cursor: pointer; padding: 5px; }
         .header-actions .icon { width: 24px; height: 24px; stroke: var(--icon-color); transition: stroke 0.2s; }
         .header-actions button:hover .icon { stroke: var(--icon-hover-color); }
-        
-        .sidebar {
-            position: fixed; top: 0; left: 0; width: 240px; height: 100vh;
-            background-color: var(--sidebar-bg); color: var(--text-sidebar);
-            padding-top: 20px; z-index: 1002; transition: transform 0.3s ease;
-            display: flex; flex-direction: column;
-        }
-
+        .sidebar { position: fixed; top: 0; left: 0; width: 240px; height: 100vh; background-color: var(--sidebar-bg); color: var(--text-sidebar); padding-top: 20px; z-index: 1002; transition: transform 0.3s ease; display: flex; flex-direction: column; }
         .sidebar-header { padding: 0 20px 20px 20px; font-size: 1.5rem; font-weight: bold; }
         .sidebar-nav { list-style: none; flex-grow: 1; overflow-y: auto; }
-        .sidebar-nav li a {
-            display: flex; align-items: center; padding: 15px 20px;
-            color: var(--text-sidebar); text-decoration: none; font-weight: 500;
-            border-left: 3px solid transparent; transition: background-color 0.2s;
-        }
+        .sidebar-nav li a { display: flex; align-items: center; padding: 12px 20px; font-size: 0.95rem; color: var(--text-sidebar); text-decoration: none; font-weight: 500; border-left: 3px solid transparent; transition: background-color 0.2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .sidebar-nav li a:hover { background-color: rgba(255, 255, 255, 0.1); }
         .sidebar-nav li a.active { background-color: rgba(0, 0, 0, 0.2); border-left-color: var(--accent-color); }
-        .sidebar-nav .icon { width: 20px; height: 20px; margin-right: 15px; stroke-width: 2; }
-        
         .main-content { padding: 20px; }
-        
-        .video-container {
-            position: sticky; top: 60px; z-index: 1000; margin-bottom: 20px;
-            background-color: #000; box-shadow: 0 4px 10px var(--shadow-color);
-            transition: all 0.3s ease;
-        }
-        
+        .video-container { position: sticky; top: 60px; z-index: 1000; margin-bottom: 20px; background-color: #000; box-shadow: 0 4px 10px var(--shadow-color); transition: all 0.3s ease; }
         #video-player { width: 100%; height: auto; max-height: calc(100vh - 80px); display: block; }
-
-        .player-controls { position: absolute; top: 10px; right: 10px; }
-        .player-controls button {
-            background: rgba(0,0,0,0.5); border: none; color: white; padding: 5px; cursor: pointer; border-radius: 50%;
-        }
-        .player-controls .icon { width: 20px; height: 20px; stroke: #fff; }
-
-        .video-container.minimized {
-            position: fixed; bottom: 20px; right: 20px; width: 320px; height: 180px; top: auto;
-        }
-        
+        .video-container.minimized { position: fixed; bottom: 20px; right: 20px; width: 320px; height: 180px; top: auto; }
         .channel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
-
-        .channel-card {
-            background-color: var(--secondary-bg); border-radius: 8px; box-shadow: 0 2px 4px var(--shadow-color);
-            overflow: hidden; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; position: relative;
-        }
+        .channel-card { background-color: var(--secondary-bg); border-radius: 8px; box-shadow: 0 2px 4px var(--shadow-color); overflow: hidden; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; position: relative; }
         .channel-card:hover { transform: translateY(-5px); box-shadow: 0 4px 8px var(--shadow-color); }
         .channel-logo-container { height: 120px; background-color: var(--primary-bg); display: flex; align-items: center; justify-content: center; }
         .channel-logo { max-width: 80%; max-height: 80%; object-fit: contain; }
         .channel-info { padding: 10px; }
         .channel-name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-        .favorite-btn {
-            position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.4);
-            border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-        }
+        .favorite-btn { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.4); border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .favorite-btn .icon { width: 20px; height: 20px; fill: none; stroke: #fff; stroke-width: 2; transition: fill 0.2s; }
         .favorite-btn.is-favorite .icon { fill: #f1c40f; stroke: #f1c40f; }
-        
-        @media (max-width: 992px) {
-            body { padding-left: 0; }
-            .header { left: 0; }
-            .header .menu-btn { display: block; }
-            .sidebar { transform: translateX(-100%); }
-            body.sidebar-open .sidebar { transform: translateX(0); }
-            body.sidebar-open::after {
-                content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-                background: rgba(0,0,0,0.5); z-index: 1001;
-            }
-            .channel-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
-        }
-
-        @media (max-width: 576px) {
-            .header-title { display: none; }
-            .search-bar { margin: 0 10px; }
-            .main-content { padding: 10px; }
-            .channel-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
-            .video-container.minimized { width: 240px; height: 135px; }
-        }
+        .loader { text-align: center; padding: 50px; font-size: 1.2rem; color: var(--text-secondary); }
+        @media (max-width: 992px) { body { padding-left: 0; } .header { left: 0; } .header .menu-btn { display: block; } .sidebar { transform: translateX(-100%); } body.sidebar-open .sidebar { transform: translateX(0); } body.sidebar-open::after { content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1001; } .channel-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); } }
+        @media (max-width: 576px) { .header-title { display: none; } .search-bar { margin: 0 10px; } .main-content { padding: 10px; } .channel-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; } .video-container.minimized { width: 240px; height: 135px; } }
     </style>
 </head>
 <body>
-
-    <header class="header">
-        <button class="menu-btn" id="menu-btn">
-             <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-        </button>
-        <h1 class="header-title" id="header-title">All Channels</h1>
-        <div class="search-bar">
-            <input type="text" id="search-input" placeholder="Search for channels..."/>
-        </div>
-        <div class="header-actions">
-            <button id="add-channel-btn" title="Add Custom Channel">
-                <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-            </button>
-            <button id="theme-toggle-btn" title="Toggle Theme">
-                <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
-            </button>
-        </div>
-    </header>
-
-    <nav class="sidebar" id="sidebar">
-        <div class="sidebar-header">Sanowar TV</div>
-        <ul class="sidebar-nav" id="category-list">
-            <li><a href="#" class="active" data-category="Live"><svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg> Live</a></li>
-            <li><a href="#" data-category="Favorites"><svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.196-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.783-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg> Favorites</a></li>
-            <li><a href="#" data-category="Recently Watched"><svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Recently Watched</a></li>
-            <li><a href="#" data-category="Sports"><svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path fill="#fff" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 000-1.5h-3.75V6z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 6a.75.75 0 00-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 000-1.5h-3.75V6z"></path><path d="M8.25 18.75a.75.75 0 000 1.5h7.5a.75.75 0 000-1.5h-7.5z"></path></svg> Sports</a></li>
-             <li><a href="#" data-category="News"><svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3h2m0 0h2m0 0h2m0 0h2m-4 4h2m0 0h2m0 0h2m0 0h2m-4 4h2m0 0h2m0 0h2m0 0h2m-4 4h2m0 0h2m0 0h2m0 0h2"></path></svg> News</a></li>
-            <li><a href="#" data-category="Movies"><svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"></path></svg> Movies</a></li>
-            <li><a href="#" data-category="Kids"><svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.196-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.783-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg> Kids</a></li>
-            <li><a href="#" data-category="Religion"><svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg> Religion</a></li>
-        </ul>
-    </nav>
-    
-    <main class="main-content" id="main-content">
-        <div class="video-container" id="video-container" style="display: none;">
-            <video id="video-player" controls="controls" autoplay="autoplay" playsinline="playsinline"></video>
-            <div class="player-controls">
-                <button id="minimize-player-btn" title="Minimize Player"><svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"></path></svg></button>
-                <button id="expand-player-btn" title="Expand Player" style="display:none;"><svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"></path></svg></button>
-            </div>
-        </div>
-        <div class="channel-grid" id="channel-grid"></div>
-    </main>
+    <header class="header"><button class="menu-btn" id="menu-btn"><svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button><h1 class="header-title" id="header-title">All Channels</h1><div class="search-bar"><input type="text" id="search-input" placeholder="Search for channels..."/></div><div class="header-actions"><button id="theme-toggle-btn" title="Toggle Theme"><svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg></button></div></header>
+    <nav class="sidebar" id="sidebar"><div class="sidebar-header">My IPTV</div><ul class="sidebar-nav" id="category-list"></ul></nav>
+    <main class="main-content" id="main-content"><div class="video-container" id="video-container" style="display: none;"><video id="video-player" controls="controls" autoplay="autoplay" playsinline="playsinline"></video></div><div class="channel-grid" id="channel-grid"><div class="loader">Loading your channels... Please wait.</div></div></main>
 
     <script>
     //<![CDATA[
     document.addEventListener('DOMContentLoaded', function() {
         // =================================================================================
-        // ## CHANNEL LIST ##
-        // এখানে নতুন চ্যানেল যোগ করুন অথবা পুরনো চ্যানেল পরিবর্তন করুন।
-        // ফরম্যাট: { name: 'চ্যানেলের নাম', logo: 'লোগোর লিংক', group: 'বিভাগ', url: 'স্ট্রিমিং লিংক' }
+        // ## শুধুমাত্র এইখানে আপনার কেনা IPTV M3U লিংকটি বসান ##
+        // নিচের "" এর ভেতরে আপনার সম্পূর্ণ M3U লিংকটি পেস্ট করুন।
         // =================================================================================
-        var defaultChannels = [
-            // News Channels
-            { 
-  name: 'GTV', 
-  logo: 'https://i.ibb.co/HhCvh05/gtv.png', 
-  group: 'Entertainment', 
-  url: 'https://cdn.jagobd.com/7438258e-953b-47e0-b6d8-65f6f3248316/index.m3u8' 
-},
-            { name: 'Al Jazeera', logo: 'https://i.imgur.com/uN6vF9E.png', group: 'News', url: 'https://live-hls-web-aje.getaj.net/AJE/01.m3u8' },
-            { name: 'DW English', logo: 'https://i.imgur.com/QIb6L2I.png', group: 'News', url: 'https://dwstream4-lh.akamaihd.net/i/dwstream4_live@124409/master.m3u8' },
-            { name: 'France 24', logo: 'https://i.imgur.com/A6jA92E.png', group: 'News', url: 'https://f24-hls-live-prod.sa.cdn.orange.com/live/hls/f24-en-hi/live.m3u8' },
-            { name: 'Euronews', logo: 'https://i.imgur.com/u2if1fU.png', group: 'News', url: 'https://euronews-euronews-world-1-eu.samsung.wurl.com/manifest/playlist.m3u8' },
-            
-            // Sports Channels
-            { name: 'T Sports', logo: 'https://i.imgur.com/aYf223u.png', group: 'Sports', url: 'https://cdn.jagobd.com/f7f8f918-971c-4394-a521-5a2ab34a02ef/index.m3u8' },
-            { name: 'Red Bull TV', logo: 'https://i.imgur.com/J32lMDJ.png', group: 'Sports', url: 'https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8' },
-            
-            // Movie Channels
-            { name: 'Pluto TV Movies', logo: 'https://i.imgur.com/974bGI3.png', group: 'Movies', url: 'http://service-stitcher.clusters.pluto.tv/stitch/hls/channel/5d648ce5e219603f0f3b47c1/master.m3u8' },
-            { name: 'Rakuten Viki', logo: 'https://i.imgur.com/zWz5L5X.png', group: 'Movies', url: 'https://viki-rakuten-vikichannel-1-eu.samsung.wurl.com/manifest/playlist.m3u8' },
+        var YOUR_M3U_LINK = "https://iptv-org.github.io/iptv/index.m3u"; // <<< এই "" এর ভেতরে আপনার লিংকটি পেস্ট করুন
 
-            // Kids Channels
-            { name: 'Moonbug Kids', logo: 'https://i.imgur.com/tZqY7e1.png', group: 'Kids', url: 'https://moonbug-moonbug-kidstv-2-eu.samsung.wurl.com/manifest/playlist.m3u8' },
-
-            // Other Channels
-            { name: 'NASA TV', logo: 'https://i.imgur.com/b2Q3sN5.png', group: 'Science', url: 'https://uplynkcontent.sinclairstoryline.com/channel/ddd29a998591453ba798e28581a690f6.m3u8' }
-        ];
-
-        var body = document.body, videoContainer = document.getElementById('video-container'),
-            video = document.getElementById('video-player'), channelGrid = document.getElementById('channel-grid'),
-            headerTitle = document.getElementById('header-title'), searchInput = document.getElementById('search-input'),
-            themeToggleBtn = document.getElementById('theme-toggle-btn'), menuBtn = document.getElementById('menu-btn'),
-            sidebar = document.getElementById('sidebar'), mainContent = document.getElementById('main-content'),
-            categoryList = document.getElementById('category-list'), addChannelBtn = document.getElementById('add-channel-btn'),
-            minimizePlayerBtn = document.getElementById('minimize-player-btn'), expandPlayerBtn = document.getElementById('expand-player-btn');
+        var body = document.body, videoContainer = document.getElementById('video-container'), video = document.getElementById('video-player'),
+            channelGrid = document.getElementById('channel-grid'), headerTitle = document.getElementById('header-title'),
+            searchInput = document.getElementById('search-input'), themeToggleBtn = document.getElementById('theme-toggle-btn'),
+            menuBtn = document.getElementById('menu-btn'), categoryList = document.getElementById('category-list');
 
         var hls = new Hls(), allChannels = [], favorites = JSON.parse(localStorage.getItem('favorites')) || [],
-            recentlyWatched = JSON.parse(localStorage.getItem('recentlyWatched')) || [], currentCategory = 'Live';
+            recentlyWatched = JSON.parse(localStorage.getItem('recentlyWatched')) || [], currentCategory = 'All';
 
+        function parseM3U(data) {
+            var lines = data.split('\n');
+            var channels = [];
+            for (var i = 0; i < lines.length; i++) {
+                if (lines[i].indexOf('#EXTINF:') === 0) {
+                    var info = lines[i];
+                    var url = lines[++i];
+                    if (url && url.trim().indexOf('http') === 0) {
+                        var logoMatch = info.match(/tvg-logo="([^"]*)"/);
+                        var groupMatch = info.match(/group-title="([^"]*)"/);
+                        var nameMatch = info.match(/,(.*)$/);
+                        channels.push({
+                            name: nameMatch ? nameMatch[1].trim() : 'Unknown',
+                            logo: logoMatch ? logoMatch[1] : 'https://via.placeholder.com/150x100.png?text=No+Logo',
+                            group: groupMatch ? groupMatch[1].replace(/\|.*?\|/g, '').trim() : 'General', // Removes quality tags like |HD|
+                            url: url.trim()
+                        });
+                    }
+                }
+            }
+            return channels;
+        }
+
+        function updateCategories(channels) {
+            var groups = ['All', 'Favorites', 'Recently Watched'];
+            channels.forEach(function(c) { if (c.group && groups.indexOf(c.group) === -1) groups.push(c.group); });
+            groups.sort();
+            categoryList.innerHTML = '';
+            groups.forEach(function(group) {
+                var li = document.createElement('li');
+                var a = document.createElement('a');
+                a.href = '#'; a.setAttribute('data-category', group);
+                a.textContent = group;
+                if (group === 'All') a.className = 'active';
+                li.appendChild(a); categoryList.appendChild(li);
+            });
+        }
+        
         function renderChannels(channels) {
             channelGrid.innerHTML = '';
-            if (channels.length === 0) {
-                channelGrid.innerHTML = '<p style="color:var(--text-primary);">No channels found.</p>'; return;
-            }
-            channels.forEach(function(channel) {
-                var isFav = favorites.indexOf(channel.url) > -1, card = document.createElement('div');
-                card.className = 'channel-card'; card.setAttribute('data-url', channel.url);
-                var favClass = isFav ? 'is-favorite' : '';
-                card.innerHTML = '<div class="channel-logo-container"><img src="' + channel.logo + '" alt="' + channel.name + ' Logo" class="channel-logo" loading="lazy" onerror="this.src=\'https://via.placeholder.com/150x100.png?text=No+Logo\'"/></div><div class="channel-info"><span class="channel-name">' + channel.name + '</span></div><button class="favorite-btn ' + favClass + '" data-url="' + channel.url + '"><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></button>';
-                card.addEventListener('click', function(e) { if (!e.target.closest('.favorite-btn')) playChannel(channel); });
-                card.querySelector('.favorite-btn').addEventListener('click', function(e) { e.stopPropagation(); toggleFavorite(channel.url); });
+            if (channels.length === 0) { channelGrid.innerHTML = '<p class="loader">No channels found for this category.</p>'; return; }
+            channels.forEach(function(c) {
+                var isFav = favorites.indexOf(c.url) > -1, card = document.createElement('div');
+                card.className = 'channel-card'; card.setAttribute('data-url', c.url);
+                card.innerHTML = '<div class="channel-logo-container"><img src="'+c.logo+'" alt="'+c.name+'" class="channel-logo" loading="lazy" onerror="this.src=\'https://via.placeholder.com/150x100.png?text=No+Logo\'"/></div><div class="channel-info"><span class="channel-name">'+c.name+'</span></div><button class="favorite-btn '+(isFav?'is-favorite':'')+'" data-url="'+c.url+'"><svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-l.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></button>';
+                card.addEventListener('click', function(e) { if (!e.target.closest('.favorite-btn')) playChannel(c); });
+                card.querySelector('.favorite-btn').addEventListener('click', function(e) { e.stopPropagation(); toggleFavorite(c.url); });
                 channelGrid.appendChild(card);
             });
         }
@@ -271,88 +134,57 @@
             videoContainer.style.display = 'block';
             if (Hls.isSupported()) { hls.loadSource(channel.url); hls.attachMedia(video); }
             else if (video.canPlayType('application/vnd.apple.mpegurl')) { video.src = channel.url; }
-            headerTitle.textContent = channel.name; document.title = channel.name + ' | Live TV';
-            addToRecentlyWatched(channel); videoContainer.scrollIntoView({ behavior: 'smooth' }); video.play();
-        }
-
-        function handleSearch(e) {
-            var term = e.target.value.toLowerCase();
-            renderChannels(allChannels.filter(function(c) { return c.name.toLowerCase().indexOf(term) > -1; }));
+            headerTitle.textContent = channel.name; document.title = channel.name;
+            addToRecentlyWatched(channel); video.play(); videoContainer.scrollIntoView({ behavior: 'smooth' });
         }
 
         function handleCategoryChange(e) {
             e.preventDefault(); var link = e.target.closest('a'); if (!link) return;
-            document.querySelector('#category-list .active').classList.remove('active'); link.classList.add('active');
+            var activeLink = document.querySelector('#category-list .active');
+            if (activeLink) activeLink.classList.remove('active');
+            link.classList.add('active');
             currentCategory = link.getAttribute('data-category');
             var channelsToShow = [];
-            if (currentCategory === 'Live') channelsToShow = allChannels;
+            if (currentCategory === 'All') channelsToShow = allChannels;
             else if (currentCategory === 'Favorites') channelsToShow = allChannels.filter(function(c) { return favorites.indexOf(c.url) > -1; });
             else if (currentCategory === 'Recently Watched') channelsToShow = recentlyWatched.map(function(url) { return allChannels.find(function(c) { return c.url === url; }); }).filter(Boolean);
-            else channelsToShow = allChannels.filter(function(c) { return c.group.toLowerCase().indexOf(currentCategory.toLowerCase()) > -1; });
+            else channelsToShow = allChannels.filter(function(c) { return c.group === currentCategory; });
             renderChannels(channelsToShow);
             if (body.classList.contains('sidebar-open')) toggleSidebar();
         }
 
-        function addCustomChannel() {
-            var name = prompt("Enter channel name:"), url;
-            if (name) { url = prompt("Enter stream URL (.m3u8):"); }
-            if (name && url) {
-                var logo = prompt("Enter logo URL (optional):");
-                var newChannel = { name: name, logo: logo || '', url: url, group: 'Custom' };
-                allChannels.unshift(newChannel); renderChannels(allChannels); playChannel(newChannel);
-            }
-        }
-
         function toggleSidebar() { body.classList.toggle('sidebar-open'); }
-        function togglePlayerSize(min) {
-            videoContainer.classList.toggle('minimized', min);
-            minimizePlayerBtn.style.display = min ? 'none' : 'block';
-            expandPlayerBtn.style.display = min ? 'block' : 'none';
-        }
-
-        function toggleTheme() {
-            body.classList.toggle('dark-theme');
-            localStorage.setItem('theme', body.classList.contains('dark-theme') ? 'dark' : 'light');
-        }
         function loadTheme() { if (localStorage.getItem('theme') === 'dark') body.classList.add('dark-theme'); }
-        
-        function toggleFavorite(url) {
-            var idx = favorites.indexOf(url);
-            if (idx > -1) favorites.splice(idx, 1); else favorites.push(url);
-            localStorage.setItem('favorites', JSON.stringify(favorites));
-            var btn = document.querySelector('.favorite-btn[data-url="' + url + '"]');
-            if (btn) btn.classList.toggle('is-favorite', idx === -1);
-            if (currentCategory === 'Favorites') handleCategoryChange({ preventDefault: function(){}, target: document.querySelector('a[data-category="Favorites"]') });
-        }
-        
-        function addToRecentlyWatched(channel) {
-            var idx = recentlyWatched.indexOf(channel.url);
-            if (idx > -1) recentlyWatched.splice(idx, 1);
-            recentlyWatched.unshift(channel.url);
-            if (recentlyWatched.length > 20) recentlyWatched.pop();
-            localStorage.setItem('recentlyWatched', JSON.stringify(recentlyWatched));
-        }
+        function toggleFavorite(url) { var idx = favorites.indexOf(url); if (idx > -1) favorites.splice(idx, 1); else favorites.push(url); localStorage.setItem('favorites', JSON.stringify(favorites)); var btn = document.querySelector('.favorite-btn[data-url="' + url + '"]'); if (btn) btn.classList.toggle('is-favorite', idx === -1); if (currentCategory === 'Favorites') handleCategoryChange({ preventDefault: function(){}, target: document.querySelector('a[data-category="Favorites"]') }); }
+        function addToRecentlyWatched(channel) { var idx = recentlyWatched.indexOf(channel.url); if (idx > -1) recentlyWatched.splice(idx, 1); recentlyWatched.unshift(channel.url); if (recentlyWatched.length > 20) recentlyWatched.pop(); localStorage.setItem('recentlyWatched', JSON.stringify(recentlyWatched)); }
 
         function init() {
-            allChannels = defaultChannels.slice(0); loadTheme(); renderChannels(allChannels);
-            themeToggleBtn.addEventListener('click', toggleTheme);
+            loadTheme();
+            if (!YOUR_M3U_LINK) { channelGrid.innerHTML = '<div class="loader" style="color: red;">M3U link is missing. Please add your M3U link in the index.html file.</div>'; return; }
+            
+            var proxyUrl = 'https://api.allorigins.win/raw?url=';
+            fetch(proxyUrl + encodeURIComponent(YOUR_M3U_LINK))
+                .then(function(response) { if (!response.ok) { throw new Error('Network response was not ok'); } return response.text(); })
+                .then(function(data) {
+                    allChannels = parseM3U(data);
+                    if(allChannels.length === 0) { throw new Error('No channels found in the M3U file. It might be empty or in a wrong format.'); }
+                    updateCategories(allChannels);
+                    renderChannels(allChannels);
+                })
+                .catch(function(error) {
+                    console.error('Error fetching M3U file:', error);
+                    channelGrid.innerHTML = '<div class="loader" style="color: red;">Failed to load channel list. Please check if the M3U link is correct and active.</div>';
+                });
+
+            themeToggleBtn.addEventListener('click', function() { body.classList.toggle('dark-theme'); localStorage.setItem('theme', body.classList.contains('dark-theme') ? 'dark' : 'light'); });
             menuBtn.addEventListener('click', toggleSidebar);
-            mainContent.addEventListener('click', function() { if (body.classList.contains('sidebar-open')) toggleSidebar(); });
-            searchInput.addEventListener('input', handleSearch);
+            searchInput.addEventListener('input', function(e) { var term = e.target.value.toLowerCase(); renderChannels(allChannels.filter(function(c) { return c.name.toLowerCase().indexOf(term) > -1; })); });
             categoryList.addEventListener('click', handleCategoryChange);
-            addChannelBtn.addEventListener('click', addCustomChannel);
-            minimizePlayerBtn.addEventListener('click', function() { togglePlayerSize(true); });
-            expandPlayerBtn.addEventListener('click', function() { togglePlayerSize(false); });
         }
         
         init();
     });
     //]]>
     </script>
-
 </body>
-
 </html>
-
-
-
